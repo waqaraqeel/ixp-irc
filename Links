@@ -1,3 +1,9 @@
 https://engineeringanywhere.colorado.edu/itp/sites/default/files/attachments/itp/team_13_-_jay_kothari_-_apr_25_2014_457_pm_-_group_13_final_capstone_paper.pdf
-#Comments
 The above paper is written cryptically but the topic is relevant. The techniques haven't been described properly. I couldn't learn anything
+
+
+http://www.cs.bu.edu/techreports/pdf/1996-006-measuring-bottleneck-link.pdf
+Bandwidth estimation with only ICMP packets. This is the ideal tool. The problem is, its not available for Linux
+
+http://www.cisco.com/c/en/us/support/docs/ip/simple-network-management-protocol-snmp/8141-calculate-bandwidth-snmp.html
+Bandwidth utilization for one interface using SNMP only. Ignores rate limiting. Only compares to line rate of the interface
