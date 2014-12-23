@@ -29,21 +29,23 @@ def fetch_value(cmd_generator, variable):
 if_id = '.' + sys.argv[1]
 cmdGen = cmdgen.CommandGenerator()
 if_name = str(fetch_value(cmdGen, IFNAME + if_id))
-if_speed = int(fetch_value(cmdGen, IFSPEED + if_id))
+if_speed = long(fetch_value(cmdGen, IFSPEED + if_id))
 
 if if_speed <= 0:
     sys.exit("interface speed is 0")
 
-prev_inoctets = int(fetch_value(cmdGen, IFINOCTETS + if_id))
-prev_outoctets = int(fetch_value(cmdGen, IFOUTOCTETS + if_id))
+prev_inoctets = long(fetch_value(cmdGen, IFINOCTETS + if_id))
+prev_outoctets = long(fetch_value(cmdGen, IFOUTOCTETS + if_id))
 sleep(INTERVAL)
 
 while True:
-    inoctets = int(fetch_value(cmdGen, IFINOCTETS + if_id))
-    outoctets = int(fetch_value(cmdGen, IFOUTOCTETS + if_id))
+    inoctets = long(fetch_value(cmdGen, IFINOCTETS + if_id))
+    outoctets = long(fetch_value(cmdGen, IFOUTOCTETS + if_id))
     d_inoctets = inoctets - prev_inoctets
     d_outoctets = outoctets - prev_outoctets
 
     util = ((d_inoctets + d_outoctets) * 8 * 100) / (INTERVAL * if_speed)
     print if_name + ' utilization: ' + str(util) + '%'
+    prev_inoctets = inoctets
+    prev_outoctets = outoctets
     sleep(INTERVAL)
