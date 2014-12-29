@@ -41,7 +41,7 @@ class QuaggaTopo(Topo):
         scriptdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))  # script directory
         "Initialize a service helper for Quagga with default options"
         quagga_svc = QuaggaService(autoStop=False)
-        snmpd_svc = SnmpdService(autoStop=False)
+        # snmpd_svc = SnmpdService(autoStop=False)
 
         "List of Quagga host configs"
         quagga_hosts = [
@@ -73,8 +73,8 @@ class QuaggaTopo(Topo):
             self.addNodeService(node=host.name, service=quagga_svc,
                                 nodeConfig=quagga_svc_config)
 
-            self.addNodeService(node=host.name, service=snmpd_svc,
-                                nodeConfig=snmpd_svc_config)
+            # self.addNodeService(node=host.name, service=snmpd_svc,
+            #                     nodeConfig=snmpd_svc_config)
 
             "Attach the quaggaContainer to the IXP Fabric Switch"
             self.addLink(quagga_container, ixpfabric, port2=host.port)
@@ -83,10 +83,10 @@ class QuaggaTopo(Topo):
         root = self.addHost('exabgp', ip='172.0.255.254/16', inNamespace=False)
         self.addLink(root, ixpfabric, port2=5)
 
-        " Add cloud server to upload files "
-        azure = self.addHost('azure', ip='10.0.0.1', inNamspace=False)
-        self.addLink(azure, quagga_nodes['x1'])
-        self.addLink(azure, quagga_nodes['y1'])
+        # " Add cloud server to upload files "
+        # azure = self.addHost('azure', ip='10.0.0.1', inNamspace=False)
+        # self.addLink(azure, quagga_nodes['x1'])
+        # self.addLink(azure, quagga_nodes['y1'])
 
 
 def add_interfaces_for_sdx_network(net_sim):
