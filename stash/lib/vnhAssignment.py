@@ -39,9 +39,9 @@ from pyretic.lib.corelib import *
 from pyretic.lib.std import *
 
 # # SDX-specific imports
-from pyretic.sdx.lib.common import *
-from pyretic.sdx.lib.setOperation import *
-from pyretic.sdx.lib.language import *
+from pyretic.hispar.lib.common import *
+from pyretic.hispar.lib.setOperation import *
+from pyretic.hispar.lib.language import *
 
 # # General imports
 from ipaddr import IPv4Network

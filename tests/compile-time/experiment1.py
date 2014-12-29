@@ -17,9 +17,9 @@ from pyretic.lib.corelib import *
 from pyretic.lib.std import *
 
 ## SDX-specific imports
-from pyretic.sdx.lib.common import *
-from pyretic.sdx.lib.core import *
-from pyretic.sdx.lib.vnhAssignment import *
+from pyretic.hispar.lib.common import *
+from pyretic.hispar.lib.core import *
+from pyretic.hispar.lib.vnhAssignment import *
 
 iplist=list(IPNetwork('182.0.0.1/24'))
 macinit='A1:A1:00:00:00:00'

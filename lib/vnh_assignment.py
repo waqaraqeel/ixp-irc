@@ -40,10 +40,10 @@ from pyretic.lib.corelib import *
 from pyretic.lib.std import *
 
 # SDX-specific imports
-from pyretic.sdx.lib.common import *
-from pyretic.sdx.lib.bgp_interface import *
-from pyretic.sdx.lib.set_operations import *
-from pyretic.sdx.lib.language import *
+from pyretic.hispar.lib.common import *
+from pyretic.hispar.lib.bgp_interface import *
+from pyretic.hispar.lib.set_operations import *
+from pyretic.hispar.lib.language import *
 
 # General imports
 from ipaddr import IPv4Network

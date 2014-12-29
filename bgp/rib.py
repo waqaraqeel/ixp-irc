@@ -15,7 +15,7 @@ class rib():
         
         with lock():
             # Create a database in RAM
-            self.db = sqlite3.connect(cwd+'/pyretic/sdx/ribs/'+ip+'.db',check_same_thread=False)
+            self.db = sqlite3.connect(cwd+'/pyretic/hispar/ribs/'+ip+'.db',check_same_thread=False)
             self.db.row_factory = sqlite3.Row
             self.name = name
         

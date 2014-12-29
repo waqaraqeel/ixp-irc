@@ -39,7 +39,7 @@ from pyretic.lib.corelib import *
 from pyretic.lib.std import *
 
 ## SDX-specific imports
-from pyretic.sdx.lib.common import *
+from pyretic.hispar.lib.common import *
 
 ## General imports
 import json
@@ -60,7 +60,7 @@ def policy(participant, fwd):
     '''
         Specify participant policy
     '''
-    participants = parse_config(cwd + "/pyretic/sdx/examples/simple/local.cfg")
+    participants = parse_config(cwd + "/pyretic/hispar/examples/simple/local.cfg")
     
     return (
         none

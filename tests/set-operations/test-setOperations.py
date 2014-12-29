@@ -38,7 +38,7 @@ from pyretic.lib.corelib import *
 from pyretic.lib.std import *
 
 # SDX specific imports
-from pyretic.sdx.lib.setOperation import *
+from pyretic.hispar.lib.setOperation import *
 
 # General imports
 import os,sys

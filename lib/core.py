@@ -35,7 +35,7 @@
 #
 
 ## General imports
-from pyretic.sdx.lib.corelib import *
+from pyretic.hispar.lib.corelib import *
 from importlib import import_module
 
 ## Pyretic-specific imports
@@ -43,12 +43,12 @@ from pyretic.lib.corelib import *
 from pyretic.lib.std import *
 
 ## SDX-specific imports
-from pyretic.sdx.lib.common import *
-from pyretic.sdx.lib.bgp_interface import *
-from pyretic.sdx.lib.set_operations import *
-from pyretic.sdx.lib.language import *
-from pyretic.sdx.lib.vnh_assignment import *
-from pyretic.sdx.lib.composition import simple_compose
+from pyretic.hispar.lib.common import *
+from pyretic.hispar.lib.bgp_interface import *
+from pyretic.hispar.lib.set_operations import *
+from pyretic.hispar.lib.language import *
+from pyretic.hispar.lib.vnh_assignment import *
+from pyretic.hispar.lib.composition import simple_compose
 
 # TODO: these should be added in the config file --AG
 VNH_2_IP = {

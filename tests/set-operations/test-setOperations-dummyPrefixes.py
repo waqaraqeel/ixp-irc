@@ -3,7 +3,7 @@
 # author: Arpit Gupta (glex.qsd@gmail.com)  #
 #############################################
 
-from pyretic.sdx.lib.setOperation import *
+from pyretic.hispar.lib.setOperation import *
 
 # General imports
 import os,sys,random

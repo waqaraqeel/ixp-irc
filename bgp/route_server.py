@@ -9,9 +9,9 @@ from server import server as Server
 #from decision_process_simple import decision_process_simple as decision_process
 from decision_process import decision_process
 
-from pyretic.sdx.utils import get_participants_ports_list
-from pyretic.sdx.lib.bgp_interface import *
-from pyretic.sdx.bgp.peer import *
+from pyretic.hispar.utils import get_participants_ports_list
+from pyretic.hispar.lib.bgp_interface import *
+from pyretic.hispar.bgp.peer import *
 
 class route_server():
     

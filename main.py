@@ -45,12 +45,12 @@ from pyretic.lib.std import *
 from pyretic.modules.mac_learner import *
 
 ## SDX-specific imports
-from pyretic.sdx.utils import *
-from pyretic.sdx.utils.arp import *
-from pyretic.sdx.utils.inet import *
-from pyretic.sdx.lib.core import *
-from pyretic.sdx.lib.bgp_interface import *
-from pyretic.sdx.bgp.route_server import route_server
+from pyretic.hispar.utils import *
+from pyretic.hispar.utils.arp import *
+from pyretic.hispar.utils.inet import *
+from pyretic.hispar.lib.core import *
+from pyretic.hispar.lib.bgp_interface import *
+from pyretic.hispar.bgp.route_server import route_server
 
 ''' Get current working directory ''' 
 cwd = os.getcwd()
@@ -67,7 +67,7 @@ class sdx_policy(DynamicPolicy):
         
         print "SDX:",self.__dict__
         
-        self.sdx = sdx_parse_config(cwd+'/pyretic/sdx/sdx_global.cfg')
+        self.sdx = sdx_parse_config(cwd+'/pyretic/hispar/sdx_global.cfg')
         
         ''' Event handling for dynamic policy compilation '''  
         event_queue=Queue()
@@ -91,7 +91,7 @@ class sdx_policy(DynamicPolicy):
         #TODO: Should we send the loaded routes on bootup to the participants?
     
         #''' Announce custom routes '''
-        #sdx_parse_announcements(cwd+'/pyretic/sdx/sdx_announcements.cfg',self.sdx)
+        #sdx_parse_announcements(cwd+'/pyretic/hispar/sdx_announcements.cfg',self.sdx)
         #sdx_annouce_custom_routes(self.sdx)
         
     def update_policy(self):
@@ -100,7 +100,7 @@ class sdx_policy(DynamicPolicy):
         # This checks for two things: 
 	# (1) Participant's policy has changed, 
 	# (2) BGP Updates changed the existing VNH to IP Prefix mapping 
-	sdx_parse_policies(cwd+'/pyretic/sdx/sdx_policies.cfg',self.sdx)
+	sdx_parse_policies(cwd+'/pyretic/hispar/sdx_policies.cfg',self.sdx)
         
         ''' Get updated policy '''
         self.policy = self.sdx.compose_policies()

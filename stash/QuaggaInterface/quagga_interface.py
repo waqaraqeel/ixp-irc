@@ -11,8 +11,8 @@ from bgp_update import*
 from json_coders import*
 from multiprocessing import Process, Queue
 ## SDX-specific imports
-from pyretic.sdx.lib.common import *
-from pyretic.sdx.lib.core import *
+from pyretic.hispar.lib.common import *
+from pyretic.hispar.lib.core import *
 
 participant_to_ebgp_nh_received1={
         'A' : {'p1':'D','p2':'D','p3':'D','p4':'C','p5':'C','p6':'C'}

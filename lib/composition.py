@@ -6,8 +6,8 @@
 ###
 ### SDX high-level functions
 ###
-from pyretic.sdx.lib.corelib import *
-from pyretic.sdx.lib.pyreticlib import *
+from pyretic.hispar.lib.corelib import *
+from pyretic.hispar.lib.pyreticlib import *
 
 
 def sdx_from(vport):

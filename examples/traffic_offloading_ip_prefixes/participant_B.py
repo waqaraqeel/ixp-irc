@@ -39,7 +39,7 @@ from pyretic.lib.corelib import *
 from pyretic.lib.std import *
 
 ## SDX-specific imports
-from pyretic.sdx.lib.common import *
+from pyretic.hispar.lib.common import *
 
 ## General imports
 import json
@@ -60,7 +60,7 @@ def policy(participant, fwd):
     '''
         Specify participant policy
     '''
-    participants = parse_config(cwd + "/pyretic/sdx/examples/traffic_offloading_ip_prefixes/local.cfg")
+    participants = parse_config(cwd + "/pyretic/hispar/examples/traffic_offloading_ip_prefixes/local.cfg")
     
     return (
         (parallel([match(dstip=participants["A"]["IPP"][i]) for i in range(len(participants["A"]["IPP"]))]) >> modify(srcmac=participant.phys_ports[0].mac) >> fwd(participant.peers['A'])) +

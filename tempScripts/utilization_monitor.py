@@ -26,26 +26,44 @@ def fetch_value(cmd_generator, variable):
     return var_binds[0][1]
 
 
-if_id = '.' + sys.argv[1]
-cmdGen = cmdgen.CommandGenerator()
-if_name = str(fetch_value(cmdGen, IFNAME + if_id))
-if_speed = long(fetch_value(cmdGen, IFSPEED + if_id))
+def get_if_id(cmd_generator, if_name):
+    error_indication, error_status, error_index, var_bind_table = cmd_generator.nextCmd(
+        cmdgen.CommunityData('public'),
+        cmdgen.UdpTransportTarget(('localhost', 161)),
+        IFNAME
+    )
 
-if if_speed <= 0:
-    sys.exit("interface speed is 0")
+    for varBindTableRow in var_bind_table:
+        for name, val in varBindTableRow:
+            if val == if_name:
+                pos = str(name).rfind(".")
+                return str(name)[pos+1:]
 
-prev_inoctets = long(fetch_value(cmdGen, IFINOCTETS + if_id))
-prev_outoctets = long(fetch_value(cmdGen, IFOUTOCTETS + if_id))
-sleep(INTERVAL)
 
-while True:
-    inoctets = long(fetch_value(cmdGen, IFINOCTETS + if_id))
-    outoctets = long(fetch_value(cmdGen, IFOUTOCTETS + if_id))
-    d_inoctets = inoctets - prev_inoctets
-    d_outoctets = outoctets - prev_outoctets
+def monitor_utilization(if_id=None, if_name=None):
+    cmd_gen = cmdgen.CommandGenerator()
+    if if_id is None and if_name is not None:
+        if_id = get_if_id(cmd_gen, if_name)
 
-    util = ((d_inoctets + d_outoctets) * 8 * 100) / (INTERVAL * if_speed)
-    print if_name + ' utilization: ' + str(util) + '%'
-    prev_inoctets = inoctets
-    prev_outoctets = outoctets
+    if_id = '.' + if_id
+    if_name = str(fetch_value(cmd_gen, IFNAME + if_id))
+    if_speed = long(fetch_value(cmd_gen, IFSPEED + if_id))
+
+    if if_speed <= 0:
+        sys.exit("interface speed is 0")
+
+    prev_inoctets = long(fetch_value(cmd_gen, IFINOCTETS + if_id))
+    prev_outoctets = long(fetch_value(cmd_gen, IFOUTOCTETS + if_id))
     sleep(INTERVAL)
+
+    while True:
+        inoctets = long(fetch_value(cmd_gen, IFINOCTETS + if_id))
+        outoctets = long(fetch_value(cmd_gen, IFOUTOCTETS + if_id))
+        d_inoctets = inoctets - prev_inoctets
+        d_outoctets = outoctets - prev_outoctets
+
+        util = ((d_inoctets + d_outoctets) * 8 * 100) / (INTERVAL * if_speed)
+        print if_name + ' utilization: ' + str(util) + '%'
+        prev_inoctets = inoctets
+        prev_outoctets = outoctets
+        sleep(INTERVAL)

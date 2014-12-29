@@ -8,8 +8,8 @@ from threading import Thread
 from multiprocessing.connection import Client
 import os
 home_path = os.environ['HOME']
-logfile = home_path + '/pyretic/pyretic/sdx/bgp/client.log'
-sys.path.append(home_path + '/pyretic/pyretic/sdx/bgp')
+logfile = home_path + '/pyretic/pyretic/hispar/bgp/client.log'
+sys.path.append(home_path + '/pyretic/pyretic/hispar/bgp')
 
 '''Write output to stdout'''
 def _write(stdout,data):
