@@ -81,7 +81,7 @@ class QuaggaTopo(Topo):
         
         " Add root node for ExaBGP. ExaBGP acts as route server for SDX. "
         root = self.addHost('exabgp', ip='172.0.255.254/16', inNamespace=False)
-        self.addLink(root, ixpfabric, port2=5)
+        self.addLink(root, ixpfabric, port2=6)
 
         # " Add cloud server to upload files "
         # azure = self.addHost('azure', ip='10.0.0.1', inNamspace=False)
