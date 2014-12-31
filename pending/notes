@@ -1,0 +1,16 @@
+Change Notes:
+
+Abstract
+========
+1. Separate writing about experiments
+2. Focus more on link utilization
+3. De-emphasize quality of service
+
+Introduction
+============
+1. Nicely written. Expand
+2. "Guaranteeing QoS is old and well-studied"? Reference
+
+
+
+Show how the very dense peering network has challenged the idea of administratively settled peering agreements and now leads to more open and announced exchange. BGP announces routes. ASes announce rates. Rates may be based on traffic volumes. It can all and should be logged. Participants, when expressing policy give their priorities. For one subnet, priority could be latency, pricing, and what not. We publicize congestion history, latency history and what not for links provided by ISPs. This model is completely new.

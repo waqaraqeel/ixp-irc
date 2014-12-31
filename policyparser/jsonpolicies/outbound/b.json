@@ -1,0 +1,23 @@
+{
+    "outbound": {
+        "10.0.0.0/8": [
+            {
+                "from": "*",
+                "srcport": "*",
+                "dstport": "*",
+                "time": "0, 24",
+                "latency": "*",
+                "jitter": "*",
+                "loss": "*",
+                "cost": "*",
+                "update_interval": "*",
+                "routes": [
+                    "X"
+                ],
+                "default": [],
+                "policy_type": "loose",
+                "check_interval": "*"
+            }
+        ]
+    }
+}

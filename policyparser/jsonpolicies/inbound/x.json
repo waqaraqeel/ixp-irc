@@ -1,0 +1,8 @@
+[
+    {
+        "subnet": "10.0.0.0/8",
+        "cost": 10,
+        "whitelist": "*",
+        "blacklist": []
+    }
+]

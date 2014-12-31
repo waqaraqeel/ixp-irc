@@ -1,0 +1,43 @@
+{
+    "outbound": {
+        "20.0.0.0/8": [
+            {
+                "from": "*",
+                "srcport": "*",
+                "dstport": "*",
+                "time": "0, 24",
+                "latency": "45+5",
+                "jitter": "*",
+                "loss": "0.2+0.1",
+                "cost": "*",
+                "update_interval": "1",
+                "routes": [
+                    "A", "B"
+                ],
+                "default": [],
+                "policy_type": "loose",
+                "check_interval": "0.3"
+            }
+        ],
+
+	"30.0.0.0/8": [
+            {
+                "from": "*",
+                "srcport": "*",
+                "dstport": "*",
+                "time": "0, 24",
+                "latency": "*",
+                "jitter": "*",
+                "loss": "*",
+                "cost": "*",
+                "update_interval": "*",
+                "routes": [
+                    "B"
+                ],
+                "default": [],
+                "policy_type": "loose",
+                "check_interval": "*"
+            }
+        ]
+    }
+}

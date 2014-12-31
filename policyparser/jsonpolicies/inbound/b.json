@@ -1,0 +1,15 @@
+[
+    {
+        "subnet": "20.0.0.0/8",
+        "cost": 10,
+        "whitelist": "*",
+        "blacklist": []
+    },
+
+    {
+        "subnet": "30.0.0.0/8",
+        "cost": 10,
+        "whitelist": "*",
+        "blacklist": []
+    }
+]

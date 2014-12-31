@@ -1,0 +1,27 @@
+from sdx.common import *
+from pyretic.core.language import IPPrefix, match, drop
+
+from extensions import HRange, UpdatePolicy
+from database import DBManager
+
+import json
+import os
+
+cwd = os.getcwd()
+
+
+def policy(participant, fwd):
+
+    UpdatePolicy.set_fwd(fwd)
+    UpdatePolicy.set_participant(participant)
+    UpdatePolicy.set_dbmanager(DBManager())
+
+    {% for rule_string in rule_strings_list %}
+    {{ rule_string }}
+    {% endfor %}
+    
+    return (
+        {% for alpha in rules_alpha %}
+        {{ alpha }}
+        {% endfor %}
+    )
