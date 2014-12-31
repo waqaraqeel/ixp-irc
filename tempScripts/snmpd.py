@@ -1,3 +1,5 @@
+""" This is a module docstring """
+
 __author__ = 'wirate'
 
 
