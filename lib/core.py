@@ -197,25 +197,25 @@ def sdx_parse_policies(policy_file,sdx):
         participant.policies = parallel([
              policy_modules[i].policy(participant, sdx) 
              for i in range(0, len(sdx_policies[participant_name]))])  
-        #print "Before pre",participant.policies
+#        print "Before pre",participant.policies
         # translate these policies for VNH Assignment
-        participant.original_policies=participant.policies
-        participant.policies=pre_VNH(participant.policies,sdx,participant_name,participant)
-        
-        #print "After pre: ",participant.policies
+#         participant.original_policies=participant.policies
+#         participant.policies=pre_VNH(participant.policies,sdx,participant_name,participant)
+#         
+#         print "After pre: ",participant.policies
     #print sdx.out_var_to_port[u'outB_1'].id_  
        
     # Virtual Next Hop Assignment
-    print "Starting VNH Assignment"
-    vnh_assignment(sdx) 
-    print "Completed VNH Assignment"
+#     print "Starting VNH Assignment"
+#     vnh_assignment(sdx) 
+#     print "Completed VNH Assignment"
     # translate these policies post VNH Assignment
     
     classifier=[]
     for participant_name in sdx.participants:
-        sdx.participants[participant_name].policies=post_VNH(sdx.participants[participant_name].policies,
-                                                         sdx,participant_name)        
-        #print "After Post VNH: ",sdx.participants[participant_name].policies
+#         sdx.participants[participant_name].policies=post_VNH(sdx.participants[participant_name].policies,
+#                                                          sdx,participant_name)        
+#         print "After Post VNH: ",sdx.participants[participant_name].policies
         start_comp=time.time()
         classifier.append(sdx.participants[participant_name].policies.compile())
         #print participant_name, time.time() - start_comp, "seconds"

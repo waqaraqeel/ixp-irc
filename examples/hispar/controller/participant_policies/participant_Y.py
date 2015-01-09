@@ -64,7 +64,9 @@ def policy(participant, sdx):
     prefixes_announced = bgp_get_announced_routes(sdx, 'Y')
 
     final_policy = (
-        (match_prefixes_set(set(prefixes_announced)) >> sdx.fwd(participant.phys_ports[0]))
-    )
+            (match(dstip=IPPrefix('110.0.0.0/16')) >> sdx.fwd(participant.peers['A'])) + 
+            (match(dstip=IPPrefix('120.0.0.0/16')) >> sdx.fwd(participant.peers['B'])) +
+            (match(dstip=IPPrefix('10.0.0.0/16')) >> sdx.fwd(participant.phys_ports[0]))
+            )
 
     return final_policy

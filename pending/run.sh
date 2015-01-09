@@ -15,7 +15,7 @@ cmds[3]="sleep 5 && ./sdx-setup.sh exabgp"
 titles[3]="exabgp"
 
 
-for i in 1 2 3; do
+for i in 1 2; do
   options+=($tab --title="${titles[i]}"  -e "bash -c \"${cmds[i]} ; bash\"" )          
 done
 

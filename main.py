@@ -36,8 +36,9 @@
 
 ## General imports
 import os
-from threading import Thread,Event
-from multiprocessing import Process,Queue
+from threading import Thread
+from multiprocessing import Queue
+from pprint import pprint
 
 ## Pyretic-specific imports
 from pyretic.lib.corelib import *
@@ -51,6 +52,7 @@ from pyretic.hispar.utils.inet import *
 from pyretic.hispar.lib.core import *
 from pyretic.hispar.lib.bgp_interface import *
 from pyretic.hispar.bgp.route_server import route_server
+from pyretic.hispar.pending.byte_counter import ByteCounter
 
 ''' Get current working directory ''' 
 cwd = os.getcwd()
@@ -104,6 +106,7 @@ class sdx_policy(DynamicPolicy):
         
         ''' Get updated policy '''
         self.policy = self.sdx.compose_policies()
+        print self.policy
 
         ''' Get updated IP to MAC list '''
         self.arp_policy.mac_of = get_ip_mac_list(self.sdx.VNH_2_IP,self.sdx.VNH_2_MAC)
@@ -120,18 +123,19 @@ def dynamic_update_policy_event_hadler(event_queue,ready_queue,update_policy):
         if ('bgp' in event_source):
             ready_queue.put(event_source)
 
-        
+
 ''' Main '''
 def main():
     
     arp_policy = arp()
     
     policy = sdx_policy(arp_policy)
-    
-    return if_(ARP,
-                   arp_policy,
-                   if_(BGP,
-                           identity,
-                           policy
-                   )
-               ) >> mac_learner()
+    byte_counter = ByteCounter(policy.sdx)
+
+    return byte_counter.get_count_policy() + \
+            if_(ARP,
+                    arp_policy,
+                    if_(BGP,
+                        identity,
+                        policy
+                        )) >> mac_learner()

@@ -4,11 +4,8 @@ import inspect
 import os
 import sys
 import atexit
-import sys, termios
 # Import topo from Mininext
 from mininext.topo import Topo
-# Import quagga service from examples
-from mininext.services.quagga import QuaggaService
 # Other Mininext specific imports
 from mininext.net import MiniNExT as Mininext
 from mininext.cli import CLI
@@ -21,14 +18,14 @@ sys.modules['mininet.util'] = mininet.util
 from mininet.node import RemoteController
 from mininet.log import setLogLevel, info
 from collections import namedtuple
-from pyretic.hispar.tempScripts.snmpd import SnmpdService
+from pyretic.hispar.pending.snmpd import SnmpdService
 
-QuaggaHost = namedtuple("QuaggaHost", "name ip mac port")
+HostTuple = namedtuple("HostTuple", "name ip mac port")
 net = None
 
 
-class QuaggaTopo(Topo):
-    """ Quagga topology example. """
+class SnmpTopo(Topo):
+    """ SNMP topology example. """
 
     def __init__(self):
 
@@ -37,82 +34,108 @@ class QuaggaTopo(Topo):
 
         # Directory where this file / script is located
         scriptdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-        # Initialize a service helper for Quagga with default options
-        quagga_svc = QuaggaService(autoStop=False)
         snmpd_svc = SnmpdService(autoStop=False)
 
-        # List of Quagga host configs"
-        quagga_hosts = [
-            (QuaggaHost(name='a1', ip='172.0.0.1/16', mac='08:00:27:89:3b:9f', port=1)),
-            (QuaggaHost(name='b1', ip='172.0.0.11/16', mac='08:00:27:92:18:1f', port=2)),
-            (QuaggaHost(name='c1', ip='172.0.0.21/16', mac='08:00:27:54:56:ea', port=3)),
-            (QuaggaHost(name='x1', ip='172.0.0.31/16', mac='08:00:27:54:56:eb', port=4)),
-            (QuaggaHost(name='y1', ip='172.0.0.41/16', mac='08:00:27:54:56:ec', port=5))]
+        # List of host configs"
+        hosts = [
+            (HostTuple(name='a1', ip='172.0.0.1/16', mac='08:00:27:89:3b:9f', port=1)),
+            (HostTuple(name='b1', ip='172.0.0.11/16', mac='08:00:27:92:18:1f', port=2)),
+            (HostTuple(name='x1', ip='172.0.0.21/16', mac='08:00:27:54:56:eb', port=3)),
+            (HostTuple(name='y1', ip='172.0.0.31/16', mac='08:00:27:54:56:ec', port=4))]
 
         # Add switch for IXP fabric"
         ixpfabric = self.addSwitch('s1')
 
         # Setup each legacy router, add a link between it and the IXP fabric"
-        quagga_nodes = {}
-        for host in quagga_hosts:
-            # Set Quagga service configuration for this node"
-            quagga_svc_config = {'quaggaConfigPath': scriptdir + '/quaggacfgs/' + host.name}
+        snmp_nodes = {}
+        for host in hosts:
+            # Set snmp service configuration for this node"
             snmpd_svc_config = {'snmpd_config_path': scriptdir + '/snmpdcfgs/' + host.name}
 
-            quagga_container = self.addHost(name=host.name,
+            snmp_container = self.addHost(name=host.name,
                                             ip=host.ip,
                                             mac=host.mac,
                                             privateLogDir=True,
                                             privateRunDir=True,
                                             inMountNamespace=True,
                                             inPIDNamespace=True)
-            quagga_nodes[host.name] = quagga_container
-
-            self.addNodeService(node=host.name, service=quagga_svc,
-                                nodeConfig=quagga_svc_config)
+            snmp_nodes[host.name] = snmp_container
 
             self.addNodeService(node=host.name, service=snmpd_svc,
                                 nodeConfig=snmpd_svc_config)
 
-            # Attach the quaggaContainer to the IXP Fabric Switch"
-            self.addLink(quagga_container, ixpfabric, port2=host.port)
-        
-        # Add root node for ExaBGP. ExaBGP acts as route server for SDX. "
-        root = self.addHost('exabgp', ip='172.0.255.254/16', inNamespace=False)
-        self.addLink(root, ixpfabric, port2=6)
+            # Attach the Container to the IXP Fabric Switch"
+            self.addLink(snmp_container, ixpfabric, port2=host.port)
 
         # Add cloud server to upload files "
-        azure = self.addHost('azure', ip='10.0.0.1', inNamspace=False)
-        self.addLink(azure, quagga_nodes['x1'])
-        self.addLink(azure, quagga_nodes['y1'])
+        azure = self.addHost('azure', ip='10.0.0.1')
+        self.addLink(azure, snmp_nodes['x1'])
+        self.addLink(azure, snmp_nodes['y1'])
+
+        # Add other intermediary hosts
+        ahost = self.addHost('ahost', ip='110.0.0.1')
+        self.addLink(snmp_nodes['a1'], ahost);
+
+        bhost1 = self.addHost('bhost1', ip='120.0.0.1')
+        bhost2 = self.addHost('bhost2', ip='120.0.0.2')
+        self.addLink(snmp_nodes['b1'], bhost1);
+        self.addLink(snmp_nodes['b1'], bhost2);
 
 
-def add_interfaces_for_sdx_network(net_sim):
+def configure_hosts(net_sim):
     hosts = net_sim.hosts
     print "Configuring participating ASs\n\n"
     for host in hosts:
         print "Host name: ", host.name
         if host.name == 'a1':
-            host.cmd('sudo ifconfig lo:110 110.0.0.1 netmask 255.255.255.0 up')
-        if host.name == 'b1':
-            host.cmd('sudo ifconfig lo:120 120.0.0.1 netmask 255.255.255.0 up')
-        if host.name == 'c1':
-            host.cmd('sudo ifconfig lo:130 130.0.0.1 netmask 255.255.255.0 up')
-        if host.name == "exabgp":
-            host.cmd('route add -net 172.0.0.0/16 dev exabgp-eth0')
-        if host.name == "x1":
-            host.cmd('route add -net 10.0.0.0/16 dev x1-eth1')
             host.cmd('sysctl -w net.ipv4.ip_forward=1')
-        if host.name == "y1":
-            host.cmd('route add -net 10.0.0.0/16 dev y1-eth1')
+            host.cmd('route add default a1-eth0')
+            host.cmd('route add -net 110.0.0.0 netmask 255.255.0.0 a1-eth1')
+            host.cmd('echo 1 > /proc/sys/net/ipv4/conf/a1-eth0/proxy_arp')
+            host.cmd('ifconfig a1-eth1 172.0.0.1 up')
+
+        elif host.name == 'b1':
             host.cmd('sysctl -w net.ipv4.ip_forward=1')
-        if host.name == "azure":
+            host.cmd('route add default b1-eth0')
+            host.cmd('route add -net 120.0.0.1 netmask 255.255.255.255 b1-eth1')
+            host.cmd('route add -net 120.0.0.2 netmask 255.255.255.255 b1-eth2')
+            host.cmd('echo 1 > /proc/sys/net/ipv4/conf/b1-eth0/proxy_arp')
+            host.cmd('ifconfig b1-eth1 172.0.0.11 up')
+            host.cmd('ifconfig b1-eth2 172.0.0.12 up')
+
+        elif host.name == "x1":
+            host.cmd('sysctl -w net.ipv4.ip_forward=1')
+            host.cmd('route add default x1-eth0')
+            host.cmd('route add -net 10.0.0.0 netmask 255.255.0.0 x1-eth1')
+            host.cmd('echo 1 > /proc/sys/net/ipv4/conf/x1-eth0/proxy_arp')
+            host.cmd('echo 1 > /proc/sys/net/ipv4/conf/x1-eth1/proxy_arp')
+
+        elif host.name == "y1":
+            host.cmd('sysctl -w net.ipv4.ip_forward=1')
+            host.cmd('route add default y1-eth0')
+            host.cmd('route add -net 10.0.0.0 netmask 255.255.0.0 y1-eth1')
+            host.cmd('echo 1 > /proc/sys/net/ipv4/conf/y1-eth0/proxy_arp')
+            host.cmd('echo 1 > /proc/sys/net/ipv4/conf/y1-eth1/proxy_arp')
+
+        elif host.name == "azure":
             host.cmd('route add default dev azure-eth0')
+
+        elif host.name == "ahost":
+            host.cmd('route add -net 172.0.0.0 netmask 255.255.0.0 ahost-eth0')
+            host.cmd('route add default gw 172.0.0.1 dev ahost-eth0')
+
+        elif host.name == "bhost1":
+            host.cmd('route add -net 172.0.0.0 netmask 255.255.0.0 bhost1-eth0')
+            host.cmd('route add default gw 172.0.0.11 dev bhost1-eth0')
+
+        elif host.name == "bhost2":
+            host.cmd('route add -net 172.0.0.0 netmask 255.255.0.0 bhost2-eth0')
+            host.cmd('route add default gw 172.0.0.12 dev bhost2-eth0')
 
 
 def start_network():
-    info('** Creating Quagga network topology\n')
-    topo = QuaggaTopo()
+    info('** Creating Snmp network topology\n')
+    topo = SnmpTopo()
     global net
     net = Mininext(topo=topo, 
                    controller=lambda name: RemoteController(name, ip='127.0.0.1'), listenPort=6633)
@@ -126,7 +149,7 @@ def start_network():
             lr.cmdPrint("ps aux")
     
     info('**Adding Network Interfaces for SDX Setup\n')
-    add_interfaces_for_sdx_network(net)
+    configure_hosts(net)
     
     info('** Running CLI\n')
     CLI(net)
@@ -134,7 +157,7 @@ def start_network():
 
 def stop_network():
     if net is not None:
-        info('** Tearing down Quagga network\n')
+        info('** Tearing down Snmp network\n')
         net.stop()
 
 if __name__ == '__main__':
