@@ -41,7 +41,8 @@ class SnmpTopo(Topo):
             (HostTuple(name='a1', ip='172.0.0.1/16', mac='08:00:27:89:3b:9f', port=1)),
             (HostTuple(name='b1', ip='172.0.0.11/16', mac='08:00:27:92:18:1f', port=2)),
             (HostTuple(name='x1', ip='172.0.0.21/16', mac='08:00:27:54:56:eb', port=3)),
-            (HostTuple(name='y1', ip='172.0.0.31/16', mac='08:00:27:54:56:ec', port=4))]
+            (HostTuple(name='y1', ip='172.0.0.31/16', mac='08:00:27:54:56:ec', port=4)),
+            (HostTuple(name='azure', ip='10.0.0.1/16', mac='08:00:27:54:56:ed', port=None))]
 
         # Add switch for IXP fabric"
         ixpfabric = self.addSwitch('s1')
@@ -65,12 +66,12 @@ class SnmpTopo(Topo):
                                 nodeConfig=snmpd_svc_config)
 
             # Attach the Container to the IXP Fabric Switch"
-            self.addLink(snmp_container, ixpfabric, port2=host.port)
+            if host.name != 'azure':
+                self.addLink(snmp_container, ixpfabric, port2=host.port)
 
-        # Add cloud server to upload files "
-        azure = self.addHost('azure', ip='10.0.0.1')
-        self.addLink(azure, snmp_nodes['x1'])
-        self.addLink(azure, snmp_nodes['y1'])
+        # Add cloud server to upload files links
+        self.addLink(snmp_nodes['azure'], snmp_nodes['x1'])
+        self.addLink(snmp_nodes['azure'], snmp_nodes['y1'])
 
         # Add other intermediary hosts
         ahost = self.addHost('ahost', ip='110.0.0.1')
@@ -124,13 +125,22 @@ def configure_hosts(net_sim):
             host.cmd('route add -net 172.0.0.0 netmask 255.255.0.0 ahost-eth0')
             host.cmd('route add default gw 172.0.0.1 dev ahost-eth0')
 
+            # Rate limiting traffic
+            host.cmd('tc qdisc add dev ahost-eth0 root netem rate 5mbit')
+
         elif host.name == "bhost1":
             host.cmd('route add -net 172.0.0.0 netmask 255.255.0.0 bhost1-eth0')
             host.cmd('route add default gw 172.0.0.11 dev bhost1-eth0')
 
+            # Rate limiting traffic
+            host.cmd('tc qdisc add dev bhost1-eth0 root netem rate 3mbit')
+
         elif host.name == "bhost2":
             host.cmd('route add -net 172.0.0.0 netmask 255.255.0.0 bhost2-eth0')
             host.cmd('route add default gw 172.0.0.12 dev bhost2-eth0')
+
+            # Rate limiting traffic
+            host.cmd('tc qdisc add dev bhost2-eth0 root netem rate 5mbit')
 
 
 def start_network():

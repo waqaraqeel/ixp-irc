@@ -62,7 +62,7 @@ def policy(participant, sdx):
         Specify participant policy
     '''
     
-    prefixes_announced=bgp_get_announced_routes(sdx,'A')
+#     prefixes_announced=bgp_get_announced_routes(sdx,'A')
     
     final_policy= (
                    (match(dstip=IPPrefix('10.0.0.0/16')) >> sdx.fwd(participant.peers['X'])) +

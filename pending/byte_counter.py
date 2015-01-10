@@ -118,7 +118,10 @@ class ByteCounter():
 
 
     def pkt_callback(self, pkt):
-        for match, byte_count in pkt.iteritems():
-            ip = match.map['dstip']
-            from_AS = self.__get_AS(match.map['inport'])
-            self.add_or_update( (str(ip), str(from_AS)), int(byte_count), INTERVAL)
+        with lock():
+            for match, byte_count in pkt.iteritems():
+                if 'dstip' in match.map and 'inport' in match.map:
+                    if match.map['dstip'] is not None and match.map['inport'] is not None:
+                        ip = match.map['dstip']
+                        from_AS = self.__get_AS(match.map['inport'])
+                        self.add_or_update( (str(ip), str(from_AS)), int(byte_count), INTERVAL)

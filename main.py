@@ -106,7 +106,6 @@ class sdx_policy(DynamicPolicy):
         
         ''' Get updated policy '''
         self.policy = self.sdx.compose_policies()
-        print self.policy
 
         ''' Get updated IP to MAC list '''
         self.arp_policy.mac_of = get_ip_mac_list(self.sdx.VNH_2_IP,self.sdx.VNH_2_MAC)
