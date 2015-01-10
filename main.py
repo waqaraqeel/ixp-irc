@@ -132,6 +132,7 @@ def main():
     byte_counter = ByteCounter(policy.sdx)
 
     return byte_counter.get_count_policy() + \
+            byte_counter.get_util_policy() + \
             if_(ARP,
                     arp_policy,
                     if_(BGP,
