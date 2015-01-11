@@ -129,13 +129,13 @@ def main():
     arp_policy = arp()
     
     policy = sdx_policy(arp_policy)
+    print policy.policy
     byte_counter = ByteCounter(policy.sdx)
 
     return byte_counter.get_count_policy() + \
-            byte_counter.get_util_policy() + \
             if_(ARP,
                     arp_policy,
                     if_(BGP,
                         identity,
                         policy
-                        )) >> mac_learner()
+                        )) >> mac_learner() >> byte_counter.get_util_policy()

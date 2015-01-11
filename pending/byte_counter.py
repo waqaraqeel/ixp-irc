@@ -1,5 +1,5 @@
 from pyretic.lib.query import count_bytes
-from threading import RLock as lock
+from threading import RLock as lock, Lock as slock
 import sqlite3
 import os
 
@@ -13,6 +13,8 @@ class ByteCounter():
         self.db = sqlite3.connect(cwd+'/pyretic/hispar/ribs/rib.db',check_same_thread=False)
         self.db.row_factory = sqlite3.Row
         self.sdx = sdx
+        self.count_lock = slock()
+        self.util_lock = slock()
 
         # Get a cursor object
         cursor = self.db.cursor()
@@ -20,8 +22,10 @@ class ByteCounter():
         cursor.execute(''' create table if not exists utilization (port integer, to_AS text, util real, total integer) ''')
 
         self.capacities = {}
-        self.capacities[3] = [10485760]
-        self.capacities[4] = [10485760]
+        self.capacities[1] = 10485760
+        self.capacities[2] = 10485760
+        self.capacities[3] = 10485760
+        self.capacities[4] = 10485760
 
         self.db.commit()
 
@@ -30,35 +34,37 @@ class ByteCounter():
             self.db.close()
 
     def add_or_update_count(self, key, total, interval):
-        old_record = self.get_count_record(key)
-        
-        if old_record is None:
-            self.add_count_record(key, 0, total)
-        else:
-            #FIXME: The total field might soon overflow.
-
-            old_total = old_record['total']
-            bps = (old_total - total) / interval
-            self.update_count_record(key, bps, total)
-
-        print str(bps/1000) + " KBps received from " + key[0]
-                
-    def add_or_update_util(self, port, to_AS, byte_count, interval):
-        print 'hella looya'
-        old_record = self.get_util_record(to_AS)
-        
-        if old_record is None:
-            util = byte_count / interval / self.capacities[port] * 100
-            self.add_util_record(port, to_AS, util, byte_count)
-        else:
-            #FIXME: The total field might soon overflow.
-
-            delta_bytes = byte_count - old_record['total']
-            util = delta_bytes / interval / self.capacities[port] * 100
-            self.update_util_record(port, to_AS, util, byte_count)
-
-        print str(byte_count/interval/1000) + " KBps received on " + str(self.capacities[port]/1000) + " KBps link: " + str(util) + "%"
+        with slock():
+            old_record = self.get_count_record(key)
             
+            if old_record is None:
+                self.add_count_record(key, 0, total)
+            else:
+                old_total = old_record['total']
+                if old_total is None:
+                    old_total = 0
+                bps = (total - old_total) / interval * 8
+                self.update_count_record(key, bps, total)
+                print str(bps/1000) + " Kbps received from " + key[0]
+                    
+    def add_or_update_util(self, port, to_AS, byte_count, interval):
+        with slock():
+            if to_AS is not None:
+                old_record = self.get_util_record(to_AS)
+            
+            if old_record is None:
+                util = byte_count * 8 / interval / float(self.capacities[port]) * 100
+                self.add_util_record(port, to_AS, util, byte_count)
+            else:
+                old_total = old_record['total']
+                if old_total is None:
+                    old_total = 0
+                delta_bytes = byte_count - old_total
+                util = delta_bytes * 8 / interval / float(self.capacities[port]) * 100
+                self.update_util_record(port, to_AS, util, byte_count)
+
+            print str(delta_bytes * 8 / interval / 1000) + " Kbps sent on port " + str(port) + ": "+ str(self.capacities[port]/1000) + " Kbps: " + str(util) + "%"
+                
     def add_count_record(self, key, bps, total):
 
         with lock():
@@ -73,7 +79,7 @@ class ByteCounter():
         with lock():
             cursor = self.db.cursor()
 
-            cursor.execute('''insert into utilization (port, to_AS, util, total) values(?,?,?)''', 
+            cursor.execute('''insert into utilization (port, to_AS, util, total) values(?,?,?,?)''', 
                         (port, to_AS, util, total))
             self.commit()
 
@@ -108,7 +114,7 @@ class ByteCounter():
         with lock():
             cursor = self.db.cursor()
 
-            script = "update utilization set util = " + str(util) + ", to_AS = " + str(to_AS) + ", total = " + str(total) + " where port = " + str(port)
+            script = "update utilization set util = " + str(util) + ", to_AS = '" + str(to_AS) + "', total = " + str(total) + " where port = " + str(port)
 
             cursor.execute(script)
             self.commit()
@@ -144,20 +150,23 @@ class ByteCounter():
 
 
     def __util_callback(self, pkt):
-        with lock():
+        with self.util_lock:
             for match, byte_count in pkt.iteritems():
                 if 'outport' in match.map:
                     if match.map['outport'] is not None:
-                        to_AS = self.__get_AS(match.map['outport'])
-                        self.add_or_update_util(int(match.map['outport']), str(to_AS), byte_count, INTERVAL)
+                        port = int(match.map['outport'])
+                        if port == 3 or port == 4:
+                            print pkt
+#                             to_AS = self.__get_AS(match.map['outport'])
+#                             self.add_or_update_util(port, str(to_AS), byte_count, INTERVAL)
 
 
     def __count_callback(self, pkt):
-        print pkt
-        with lock():
+        with self.count_lock:
             for match, byte_count in pkt.iteritems():
                 if 'inport' in match.map and 'dstip' in match.map:
                     if match.map['inport'] is not None and match.map['dstip'] is not None:
-                        ip = match.map['dstip']
-                        from_AS = self.__get_AS(match.map['inport'])
-                        self.add_or_update_count( (str(ip), str(from_AS)), int(byte_count), INTERVAL)
+                        ip = str(match.map['dstip'])
+			if not ip.startswith('172.0.0.'):
+			    from_AS = self.__get_AS(match.map['inport'])
+			    self.add_or_update_count( (ip, str(from_AS)), int(byte_count), INTERVAL)
